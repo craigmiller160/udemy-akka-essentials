@@ -4,7 +4,7 @@ ThisBuild / scalaVersion := "2.13.8"
 
 val scalazVersion = "7.3.6"
 val akkaVersion = "2.6.18"
-val scalaTestVersion = "3.211"
+val scalaTestVersion = "3.2.11"
 
 libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % scalazVersion,
