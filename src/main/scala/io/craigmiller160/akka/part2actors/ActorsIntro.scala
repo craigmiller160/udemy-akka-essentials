@@ -1,8 +1,9 @@
 package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import akka.actor.{Actor, ActorSystem, Props}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ActorsIntro extends App {
   val actorSystem = ActorSystem("firstActorSystem")
