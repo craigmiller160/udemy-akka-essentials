@@ -9,6 +9,7 @@ object ActorsIntro extends App {
   val actorSystem = ActorSystem("firstActorSystem")
 
   val wordCounter = actorSystem.actorOf(Props[WordCountActor], "wordCounter")
+  val person = actorSystem.actorOf(Person.props("Bob"), "person")
 
   wordCounter ! "Hello World"
   wordCounter ! "Hello World 2"
@@ -17,11 +18,15 @@ object ActorsIntro extends App {
   wordCounter ! "Hello World 5"
   wordCounter ! "Hello World 6"
 
+  person ! "Hi"
+
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
 }
 
 class WordCountActor extends Actor {
+  println("[word counter] Instantiated")
+
   var totalWords = 0
   override def receive: Receive = {
     case message: String => {
@@ -29,5 +34,14 @@ class WordCountActor extends Actor {
       totalWords += message.split(" ").length
     }
     case msg => println(s"[word counter] I cannot understand ${msg.toString}")
+  }
+}
+
+object Person {
+  def props(name: String): Props = Props(new Person(name))
+}
+class Person(name: String) extends Actor {
+  override def receive: Receive = {
+    case "Hi" => println(s"Hi, my name is $name")
   }
 }
