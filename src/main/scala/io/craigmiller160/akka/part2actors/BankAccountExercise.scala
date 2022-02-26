@@ -20,9 +20,9 @@ object BankOperation extends Enumeration {
   type BankOperation = Value
   val DEPOSIT: BankOperation = Value
   val WITHDRAWAL: BankOperation = Value
-  val STATEMENT: BankOperation = Value
 }
 
+case class BankAccountStatementRequest()
 case class BankAccountRequest(operation: BankOperation, amount: Double)
 case class BankAccountResponse(operation: BankOperation, amount: Double, balance: Double)
 
@@ -30,9 +30,10 @@ abstract class BankAccountException(response: BankAccountResponse) extends Runti
 case class InsufficientFundsException(response: BankAccountResponse) extends BankAccountException(response)
 
 case class Transaction(timestamp: LocalDateTime, operation: BankOperation, amount: Double, startBalance: Double, endBalance)
+case class Statement(timestamp: LocalDateTime, balance: Double, transactions: List[Transaction])
 
 class BankAccount extends Actor {
-  var balance = 0
+  var balance: Double = 0
   var transactions: List[Transaction] = List()
 
   private def newTransaction(operation: BankOperation, amount: Double, startBalance: Double, endBalance: Double): Unit = {
@@ -53,5 +54,7 @@ class BankAccount extends Actor {
       balance -= amount
       newTransaction(operation, amount, startBalance, balance)
       sender() ! Success(BankAccountResponse(operation, amount, balance))
+    case BankAccountStatementRequest =>
+      sender() ! Success(Statement(LocalDateTime.now(), balance, transactions.reverse))
   }
 }
