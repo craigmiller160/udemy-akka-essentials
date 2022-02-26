@@ -11,12 +11,14 @@ object ActorCapabilities extends App {
   val alice = actorSystem.actorOf(Props[SimpleActor], "alice")
   val bob = actorSystem.actorOf(Props[SimpleActor], "bob")
 
-  simpleActor ! "Hello, actor"
-  simpleActor ! 42
-  simpleActor ! SpecialMessage("some special content")
-  simpleActor ! SendMessageToYourself("Send to yourself")
+//  simpleActor ! "Hello, actor"
+//  simpleActor ! 42
+//  simpleActor ! SpecialMessage("some special content")
+//  simpleActor ! SendMessageToYourself("Send to yourself")
+//
+//  alice ! SayHiTo(bob)
 
-  alice ! SayHiTo(bob)
+  alice ! WirelessPhoneMessage("Hi", bob)
 
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
@@ -25,6 +27,7 @@ object ActorCapabilities extends App {
 case class SpecialMessage(contents: String)
 case class SendMessageToYourself(content: String)
 case class SayHiTo(ref: ActorRef)
+case class WirelessPhoneMessage(content: String, ref: ActorRef)
 
 class SimpleActor extends Actor {
   override def receive: Receive = {
@@ -34,5 +37,6 @@ class SimpleActor extends Actor {
     case SpecialMessage(content) => println(s"[$self] I have received special message: $content")
     case SendMessageToYourself(content) => self ! content
     case SayHiTo(ref) => ref ! "Hi"
+    case WirelessPhoneMessage(content, ref) => ref forward content
   }
 }
