@@ -9,6 +9,8 @@ import scala.util.{Failure, Success}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+// TODO the statement request is hitting dead letter
+
 object BankAccountExercise extends App {
   val actorSystem = ActorSystem("bankAccountSystem")
   val account = actorSystem.actorOf(Props[BankAccount], "account")
