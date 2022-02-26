@@ -2,11 +2,12 @@ package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import scalaz.{Foldable, Monoid}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
-
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 object BankAccountExercise extends App {
   val actorSystem = ActorSystem("bankAccountSystem")
@@ -14,6 +15,9 @@ object BankAccountExercise extends App {
   val owner = actorSystem.actorOf(AccountOwner.withAccount(account), "owner")
 
   owner ! BankAccountRequest(BankOperation.DEPOSIT, 100)
+  owner ! BankAccountRequest(BankOperation.WITHDRAWAL, 50)
+  owner ! BankAccountRequest(BankOperation.WITHDRAWAL, 80)
+  owner ! BankAccountStatementRequest()
 
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
@@ -32,6 +36,11 @@ case class BankAccountResponse(operation: BankOperation.Value, amount: Double, b
 abstract class BankAccountException(name: String, response: BankAccountResponse) extends RuntimeException(s"$name: Operation: ${response.operation} Amount: ${response.amount} Balance: ${response.balance}")
 case class InsufficientFundsException(response: BankAccountResponse) extends BankAccountException("InsufficientFunds", response)
 
+object Transaction {
+  private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+  def format(timestamp: LocalDateTime): String =
+    formatter.format(timestamp)
+}
 case class Transaction(timestamp: LocalDateTime, operation: BankOperation.Value, amount: Double, startBalance: Double, endBalance: Double)
 case class Statement(timestamp: LocalDateTime, balance: Double, transactions: List[Transaction])
 
@@ -62,6 +71,17 @@ class BankAccount extends Actor {
   }
 }
 
+case class StringLineMonoid() extends Monoid[String] {
+  override def zero: String = ""
+  override def append(f1: String, f2: => String): String = f1 match {
+    case "" => f2
+    case _ => s"$f1\n$f2"
+  }
+}
+object Monoids {
+  val StringLine: Monoid[String] = StringLineMonoid()
+}
+
 object AccountOwner {
   def withAccount(account: ActorRef): Props = Props(new AccountOwner(account))
 }
@@ -72,6 +92,10 @@ class AccountOwner(account: ActorRef) extends Actor {
       account ! BankAccountRequest(operation, amount)
     case Success(BankAccountResponse(operation, amount, balance)) =>
       println(s"Request successful: Operation: $operation Amount: $amount Balance: $balance")
+    case Success(Statement(timestamp, balance, transactions)) =>
+      val txns = transactions.map(txn => s"Timestamp: ${Transaction.format(txn.timestamp)} Operation: ${txn.operation} Amount: ${txn.amount} Start Balance: ${txn.startBalance} End Balance: ${txn.endBalance}")
+        .fold(Monoids.StringLine.zero)(Monoids.StringLine.append)
+      println(s"Statement Request successful. Timestamp: $timestamp Balance: $balance Transactions:\n$txns")
     case Failure(ex: BankAccountException) =>
       println(s"Request failed: ${ex.getMessage}")
   }
