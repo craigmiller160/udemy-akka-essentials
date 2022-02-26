@@ -1,7 +1,7 @@
 package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -11,6 +11,10 @@ import java.time.LocalDateTime
 
 object BankAccountExercise extends App {
   val actorSystem = ActorSystem("bankAccountSystem")
+  val account = actorSystem.actorOf(Props[BankAccount], "account")
+  val owner = actorSystem.actorOf(AccountOwner.withAccount(account), "owner")
+
+
 
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
@@ -56,5 +60,20 @@ class BankAccount extends Actor {
       sender() ! Success(BankAccountResponse(operation, amount, balance))
     case BankAccountStatementRequest =>
       sender() ! Success(Statement(LocalDateTime.now(), balance, transactions.reverse))
+  }
+}
+
+object AccountOwner {
+  def withAccount(account: ActorRef): Props = Props(new AccountOwner(account))
+}
+class AccountOwner(account: ActorRef) extends Actor {
+  override def receive: Receive = {
+    case r: BankAccountRequest =>
+      println(s"Sending Request: $r")
+      account ! r
+    case Success(r: BankAccountResponse) =>
+      println(s"Request successful: $r")
+    case Failure(ex: BankAccountException) =>
+      println(s"Request failed: ${ex.getMessage}")
   }
 }
