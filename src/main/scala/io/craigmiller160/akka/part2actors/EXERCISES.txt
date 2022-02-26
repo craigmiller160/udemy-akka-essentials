@@ -1,0 +1,12 @@
+1. a Counter actor with internal variable
+    - Increment
+    - Decrement
+    - Print (prints the internal count)
+
+2. a Bank Account as an actor
+    - Deposit an amount
+    - Withdraw an amount
+    - Statement (all transactions)
+    - No console printing
+    - Deposit/Withdraw sends back success vs failure response
+    - interact with some other kind of actor that sends the requests to the Bank Account actor
