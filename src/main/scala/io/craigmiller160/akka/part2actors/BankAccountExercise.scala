@@ -24,12 +24,12 @@ class BankAccount extends Actor {
   override def receive: Receive = {
     case Deposit(amount) =>
       balance += amount
-      Success(balance)
+      sender() ! Success(balance)
     case Withdraw(amount) if (amount > balance) =>
-      Failure(new InsufficientFundsException(balance))
+      sender() ! Failure(new InsufficientFundsException(balance))
     case Withdraw(amount) =>
       balance -= amount
-      Success(balance)
+      sender() ! Success(balance)
     case Statement => ???
   }
 }
