@@ -4,6 +4,7 @@ package io.craigmiller160.akka.part2actors
 import akka.actor.{Actor, ActorSystem, Props}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import CounterAction._
 
 object CounterExercise extends App {
   val actorSystem = ActorSystem("counterSystem")
@@ -15,6 +16,8 @@ object CounterExercise extends App {
   counter ! CounterAction.DECREMENT
   counter ! CounterAction.PRINT
 
+  val foo: CounterAction = CounterAction.DECREMENT
+
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
 }
@@ -22,9 +25,7 @@ object CounterExercise extends App {
 object CounterAction extends Enumeration {
   type CounterAction = Value
 
-  val INCREMENT: CounterAction = Value("INCREMENT")
-  val DECREMENT: CounterAction = Value("DECREMENT")
-  val PRINT: CounterAction = Value("PRINT")
+  val INCREMENT, DECREMENT, PRINT = Value
 }
 
 class Counter extends Actor {

@@ -5,6 +5,7 @@ import akka.actor.{Actor, ActorSystem}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
+import BankOperation._
 
 object BankAccountExercise extends App {
   val actorSystem = ActorSystem("bankAccountSystem")
@@ -13,23 +14,31 @@ object BankAccountExercise extends App {
     .map(_ => println("ActorSystem terminated"))
 }
 
-case class Deposit(amount: Double)
-case class Withdraw(amount: Double)
-case class Statement()
-case class InsufficientFundsException(balance: Double) extends RuntimeException(s"Insufficient funds. Balance: $balance")
+object BankOperation extends Enumeration {
+  type BankOperation = Value
+  val DEPOSIT: BankOperation = Value
+  val WITHDRAWAL: BankOperation = Value
+  val STATEMENT: BankOperation = Value
+}
+
+case class BankAccountRequest(operation: BankOperation, amount: Double)
+case class BankAccountResponse(operation: BankOperation, amount: Double, balance: Double)
+
+abstract class BankAccountException(response: BankAccountResponse) extends RuntimeException(s"${getClass.getSimpleName}: Operation: ${response.operation} Amount: ${response.amount} Balance: ${response.balance}")
+case class InsufficientFundsException(response: BankAccountResponse) extends BankAccountException(response)
 
 class BankAccount extends Actor {
   var balance = 0
 
   override def receive: Receive = {
-    case Deposit(amount) =>
+    case BankAccountRequest(operation, amount) if (operation == BankOperation.DEPOSIT) =>
       balance += amount
-      sender() ! Success(balance)
-    case Withdraw(amount) if (amount > balance) =>
-      sender() ! Failure(new InsufficientFundsException(balance))
-    case Withdraw(amount) =>
+      sender() ! Success(BankAccountResponse(operation, amount, balance))
+    case BankAccountRequest(operation, amount)
+      if (operation == BankOperation.WITHDRAWAL && amount > balance) =>
+      sender() ! Failure(InsufficientFundsException(BankAccountResponse(operation, amount, balance)))
+    case BankAccountRequest(operation, amount) if (operation == BankOperation.WITHDRAWAL) =>
       balance -= amount
-      sender() ! Success(balance)
-    case Statement => ???
+      sender() ! Success(BankAccountResponse(operation, amount, balance))
   }
 }
