@@ -29,8 +29,8 @@ case class BankAccountStatementRequest()
 case class BankAccountRequest(operation: BankOperation.Value, amount: Double)
 case class BankAccountResponse(operation: BankOperation.Value, amount: Double, balance: Double)
 
-abstract class BankAccountException(response: BankAccountResponse) extends RuntimeException(s"${getClass.getSimpleName}: Operation: ${response.operation} Amount: ${response.amount} Balance: ${response.balance}")
-case class InsufficientFundsException(response: BankAccountResponse) extends BankAccountException(response)
+abstract class BankAccountException(name: String, response: BankAccountResponse) extends RuntimeException(s"$name: Operation: ${response.operation} Amount: ${response.amount} Balance: ${response.balance}")
+case class InsufficientFundsException(response: BankAccountResponse) extends BankAccountException("InsufficientFunds", response)
 
 case class Transaction(timestamp: LocalDateTime, operation: BankOperation.Value, amount: Double, startBalance: Double, endBalance: Double)
 case class Statement(timestamp: LocalDateTime, balance: Double, transactions: List[Transaction])
