@@ -67,11 +67,11 @@ object AccountOwner {
 }
 class AccountOwner(account: ActorRef) extends Actor {
   override def receive: Receive = {
-    case r: BankAccountRequest =>
-      println(s"Sending Request: $r")
-      account ! r
-    case Success(r: BankAccountResponse) =>
-      println(s"Request successful: $r")
+    case BankAccountRequest(operation, amount) =>
+      println(s"Sending Request: Operation: $operation Amount: $amount")
+      account ! BankAccountRequest(operation, amount)
+    case Success(BankAccountResponse(operation, amount, balance)) =>
+      println(s"Request successful: Operation: $operation Amount: $amount Balance: $balance")
     case Failure(ex: BankAccountException) =>
       println(s"Request failed: ${ex.getMessage}")
   }
