@@ -94,7 +94,7 @@ class AccountOwner(account: ActorRef) extends Actor {
       println(s"Request successful: Operation: $operation Amount: $amount Balance: $balance")
     case Success(Statement(timestamp, balance, transactions)) =>
       val txns = transactions.map(txn => s"Timestamp: ${Transaction.format(txn.timestamp)} Operation: ${txn.operation} Amount: ${txn.amount} Start Balance: ${txn.startBalance} End Balance: ${txn.endBalance}")
-        .fold(Monoids.StringLine.zero)(Monoids.StringLine.append)
+//        .fold(Monoids.StringLine.zero)(Monoids.StringLine.append)
       println(s"Statement Request successful. Timestamp: $timestamp Balance: $balance Transactions:\n$txns")
     case Failure(ex: BankAccountException) =>
       println(s"Request failed: ${ex.getMessage}")
