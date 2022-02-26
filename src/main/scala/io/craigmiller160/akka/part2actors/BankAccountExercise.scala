@@ -89,6 +89,9 @@ class AccountOwner(account: ActorRef) extends Actor {
     case BankAccountRequest(operation, amount) =>
       println(s"Sending Request: Operation: $operation Amount: $amount")
       account ! BankAccountRequest(operation, amount)
+    case r: BankAccountStatementRequest =>
+      println("Sending Request for statement")
+      account ! r
     case Success(BankAccountResponse(operation, amount, balance)) =>
       println(s"Request successful: Operation: $operation Amount: $amount Balance: $balance")
     case Success(Statement(timestamp, balance, transactions)) =>
