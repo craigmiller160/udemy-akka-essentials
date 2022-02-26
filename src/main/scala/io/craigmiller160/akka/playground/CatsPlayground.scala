@@ -17,4 +17,7 @@ object CatsPlayground extends App {
 
   val result = list.fold(stringMonoid.empty)(stringMonoid.combine)
   println(result)
+
+  val result2 = stringMonoid.combineAll(list)
+  println(result2)
 }

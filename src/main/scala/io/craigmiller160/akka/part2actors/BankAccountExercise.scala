@@ -2,7 +2,7 @@ package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import scalaz.{Foldable, Monoid}
+import cats.kernel.Monoid
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
@@ -70,16 +70,15 @@ class BankAccount extends Actor {
       sender() ! Success(Statement(LocalDateTime.now(), balance, transactions.reverse))
   }
 }
-
-case class StringLineMonoid() extends Monoid[String] {
-  override def zero: String = ""
-  override def append(f1: String, f2: => String): String = f1 match {
-    case "" => f2
-    case _ => s"$f1\n$f2"
-  }
-}
 object Monoids {
-  val StringLine: Monoid[String] = StringLineMonoid()
+  val stringMonoid = new Monoid[String] {
+    override def empty: String = ""
+
+    override def combine(x: String, y: String): String = x match {
+      case "" => y
+      case _ => s"$x $y"
+    }
+  }
 }
 
 object AccountOwner {
@@ -94,8 +93,8 @@ class AccountOwner(account: ActorRef) extends Actor {
       println(s"Request successful: Operation: $operation Amount: $amount Balance: $balance")
     case Success(Statement(timestamp, balance, transactions)) =>
       val txns = transactions.map(txn => s"Timestamp: ${Transaction.format(txn.timestamp)} Operation: ${txn.operation} Amount: ${txn.amount} Start Balance: ${txn.startBalance} End Balance: ${txn.endBalance}")
-//        .fold(Monoids.StringLine.zero)(Monoids.StringLine.append)
-      println(s"Statement Request successful. Timestamp: $timestamp Balance: $balance Transactions:\n$txns")
+      val txnString = Monoids.stringMonoid.combineAll(txns)
+      println(s"Statement Request successful. Timestamp: $timestamp Balance: $balance Transactions:\n$txnString")
     case Failure(ex: BankAccountException) =>
       println(s"Request failed: ${ex.getMessage}")
   }
