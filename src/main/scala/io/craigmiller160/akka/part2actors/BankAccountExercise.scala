@@ -5,7 +5,6 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
-import BankOperation._
 
 import java.time.LocalDateTime
 
@@ -14,7 +13,7 @@ object BankAccountExercise extends App {
   val account = actorSystem.actorOf(Props[BankAccount], "account")
   val owner = actorSystem.actorOf(AccountOwner.withAccount(account), "owner")
 
-
+  owner ! BankAccountRequest(BankOperation.DEPOSIT, 100)
 
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
@@ -27,20 +26,20 @@ object BankOperation extends Enumeration {
 }
 
 case class BankAccountStatementRequest()
-case class BankAccountRequest(operation: BankOperation, amount: Double)
-case class BankAccountResponse(operation: BankOperation, amount: Double, balance: Double)
+case class BankAccountRequest(operation: BankOperation.Value, amount: Double)
+case class BankAccountResponse(operation: BankOperation.Value, amount: Double, balance: Double)
 
 abstract class BankAccountException(response: BankAccountResponse) extends RuntimeException(s"${getClass.getSimpleName}: Operation: ${response.operation} Amount: ${response.amount} Balance: ${response.balance}")
 case class InsufficientFundsException(response: BankAccountResponse) extends BankAccountException(response)
 
-case class Transaction(timestamp: LocalDateTime, operation: BankOperation, amount: Double, startBalance: Double, endBalance)
+case class Transaction(timestamp: LocalDateTime, operation: BankOperation.Value, amount: Double, startBalance: Double, endBalance: Double)
 case class Statement(timestamp: LocalDateTime, balance: Double, transactions: List[Transaction])
 
 class BankAccount extends Actor {
   var balance: Double = 0
   var transactions: List[Transaction] = List()
 
-  private def newTransaction(operation: BankOperation, amount: Double, startBalance: Double, endBalance: Double): Unit = {
+  private def newTransaction(operation: BankOperation.Value, amount: Double, startBalance: Double, endBalance: Double): Unit = {
     transactions = Transaction(LocalDateTime.now(), operation, amount, startBalance, balance) :: transactions
   }
 
