@@ -9,6 +9,7 @@ import scala.util.{Failure, Success}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.util.chaining._
+import io.craigmiller160.akka.function.ListExt._
 
 object BankAccountExercise extends App {
   val actorSystem = ActorSystem("bankAccountSystem")
@@ -98,7 +99,7 @@ class AccountOwner(account: ActorRef) extends Actor {
       println(s"Request successful: Operation: $operation Amount: $amount Balance: $balance")
     case Success(Statement(timestamp, balance, transactions)) =>
       val txns = transactions.map(txn => s"Timestamp: ${Transaction.format(txn.timestamp)} Operation: ${txn.operation} Amount: ${txn.amount} Start Balance: ${txn.startBalance} End Balance: ${txn.endBalance}")
-        .pipe(Monoids.stringMonoid.combineAll)
+        .foldM(Monoids.stringMonoid)
       println(s"Statement Request successful. Timestamp: $timestamp Balance: $balance Transactions:\n$txns")
     case Failure(ex: BankAccountException) =>
       println(s"Request failed: ${ex.getMessage}")
