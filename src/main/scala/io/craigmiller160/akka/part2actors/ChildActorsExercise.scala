@@ -42,6 +42,7 @@ class WordCounterMaster extends Actor {
       parts.foreach { part =>
         circularItr.next() ! WordCountMessage.Task(part)
       }
+      context.become(waitingForCount(workers, 0, parts.length))
   }
 
   private def waitingForCount(workers: Set[ActorRef], totalCount: Int, pendingTasks: Int): Receive = {
