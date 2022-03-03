@@ -3,11 +3,25 @@ package io.craigmiller160.akka.part2actors
 
 import io.craigmiller160.akka.utils.ActorSystemHandler
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Props}
 
 object VotingSystemExercise extends App{
   ActorSystemHandler.useSimpleSystem("votingSystem", system => {
+    val c1 = system.actorOf(Props[Citizen])
+    val c2 = system.actorOf(Props[Citizen])
+    val c3 = system.actorOf(Props[Citizen])
+    val c4 = system.actorOf(Props[Citizen])
+    val c5 = system.actorOf(Props[Citizen])
+    val aggregator = system.actorOf(Props[VoteAggregator])
 
+    val citizens = Set(c1, c2, c3, c4, c5)
+
+    c1 ! Candidate.BILL_CLINTON
+    c2 ! Candidate.BILL_CLINTON
+    c3 ! Candidate.ROSS_PEROT
+    c4 ! Candidate.GEORGE_BUSH
+
+    aggregator ! AggregateVotes
   })
 }
 
