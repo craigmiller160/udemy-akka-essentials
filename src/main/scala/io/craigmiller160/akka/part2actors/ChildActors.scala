@@ -29,7 +29,7 @@ class Parent extends Actor {
 
   private def withChild(child: ActorRef): Receive = {
     case TellChild(message) =>
-      child ! message
+      child forward message
   }
 }
 
