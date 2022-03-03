@@ -1,10 +1,14 @@
 package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
 object ChangingActorBehavior extends App {
+  val system = ActorSystem("changingActorBehavior")
+  val fussyKid = system.actorOf(Props[FussyKid])
+  val mom = system.actorOf(Props[Mom])
 
+  mom ! Mom.MomStart
 }
 
 object FussyKid {
@@ -29,13 +33,21 @@ class FussyKid extends Actor {
 }
 
 object Mom {
+  case class MomStart(kid: ActorRef)
   case class Food(food: String)
   case class Ask(message: String)
   val VEGETABLE = "veggies"
   val CHOCOLATE = "chocolate"
 }
 class Mom extends Actor {
-  override def receive: Receive = ???
+  import Mom._
+  override def receive: Receive = {
+    case MomStart(kid) =>
+      kid ! Food(VEGETABLE)
+      kid ! Ask("do you want to play?")
+    case FussyKid.KidAccept => println("Yay, my kid is happy!")
+    case FussyKid.KidReject => println("My kid is sad, but at least he's healthy!")
+  }
 }
 
 
