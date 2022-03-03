@@ -38,10 +38,22 @@ class WordCounterMaster extends Actor {
   private def count(workers: Set[ActorRef]): Receive = {
     case text: String =>
       val parts = text.split("[,.;:?!]")
+      val workersAndParts = workers.zipAll(parts, "", "")
+      workersAndParts.foreach {
+        case (worker, part) => worker ! WordCountMessage.Task(part)
+      }
   }
 
-  private def waitingForCount: Receive = {
-    case WordCountMessage.Reply(count) =>
+  private def waitingForCount(workers: Set[ActorRef], totalCount: Int, pendingTasks: Int): Receive = {
+    case WordCountMessage.Reply(theCount) =>
+      val newTotalCount = totalCount + theCount
+      val newPendingTasks = pendingTasks - 1
+      if (newPendingTasks == 0) {
+        println(s"Word Count is: $newTotalCount")
+        context.become(count(workers))
+      } else {
+        context.become(waitingForCount(workers, newTotalCount, newPendingTasks))
+      }
   }
 }
 class WordCounterWorker extends Actor {
