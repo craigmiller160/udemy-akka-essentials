@@ -35,6 +35,7 @@ case object VoteStatusRequest
 case class VoteStatusReply(candidate: Option[Candidate.Value])
 case class VoteAggregation(billClinton: Int, georgeBush: Int, rossPerot: Int)
 case class AggregateVotes(citizens: Set[ActorRef])
+case object AggregationComplete
 
 class Citizen extends Actor {
   override def receive: Receive = doReceive(None)
@@ -48,13 +49,15 @@ class Citizen extends Actor {
   }
 }
 class VoteAggregator extends Actor {
-  override def receive: Receive = doReceive(VoteAggregation(0, 0, 0))
+  override def receive: Receive = awaitAggregation
 
-  // TODO what if multiple AggregateVotes requests are sent?
-  // TODO how to know when all vote responses are received and to print out the results
-  private def doReceive(aggregation: VoteAggregation): Receive = {
+  private def awaitAggregation: Receive = {
     case AggregateVotes(citizens) =>
       citizens.foreach(ref => ref ! VoteStatusRequest)
+      context.become(doAggregate(VoteAggregation(0, 0, 0), citizens.size))
+  }
+
+  private def doAggregate(aggregation: VoteAggregation, votesToCount: Int): Receive = {
     case VoteStatusReply(candidate) =>
       val newAggregation = candidate match {
         case Some(Candidate.BILL_CLINTON) => aggregation.copy(billClinton = aggregation.billClinton + 1)
@@ -62,8 +65,15 @@ class VoteAggregator extends Actor {
         case Some(Candidate.ROSS_PEROT) => aggregation.copy(rossPerot = aggregation.rossPerot + 1)
         case None => aggregation
       }
-      printVotes(newAggregation)
-      context.become(doReceive(newAggregation))
+      val newVotesToCount = votesToCount - 1
+      if (newVotesToCount > 0) {
+        context.become(doAggregate(newAggregation, newVotesToCount))
+      } else {
+        self ! AggregationComplete
+      }
+    case AggregationComplete =>
+      printVotes(aggregation)
+      context.become(awaitAggregation)
   }
 
   private def printVotes(aggregation: VoteAggregation): Unit = {
