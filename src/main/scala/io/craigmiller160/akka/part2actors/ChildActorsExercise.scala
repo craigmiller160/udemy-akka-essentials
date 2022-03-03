@@ -8,6 +8,7 @@ import io.craigmiller160.akka.utils.ActorSystemHandler
 object ChildActorsExercise extends App {
   ActorSystemHandler.useSimpleSystem("childActorExercise", system => {
     val text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    println(s"EXPECTED: ${text.split(" ").length}")
     val master = system.actorOf(Props[WordCounterMaster], "master")
 
     master ! WordCountMessage.Initialize(10)
@@ -50,7 +51,7 @@ class WordCounterMaster extends Actor {
       val newTotalCount = totalCount + theCount
       val newPendingTasks = pendingTasks - 1
       if (newPendingTasks == 0) {
-        println(s"Word Count is: $newTotalCount")
+        println(s"TOTAL COUNT: $newTotalCount")
         context.become(count(workers))
       } else {
         context.become(waitingForCount(workers, newTotalCount, newPendingTasks))
@@ -60,7 +61,11 @@ class WordCounterMaster extends Actor {
 class WordCounterWorker extends Actor {
   override def receive: Receive = {
     case WordCountMessage.Task(text) =>
-      val wordCount = text.split(" ").length
-      sender() ! WordCountMessage.Reply(wordCount)
+      if (text.trim.isEmpty) {
+        sender() ! WordCountMessage.Reply(0)
+      } else {
+        val wordCount = text.trim.split(" ").length
+        sender() ! WordCountMessage.Reply(wordCount)
+      }
   }
 }
