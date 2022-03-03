@@ -16,8 +16,6 @@ object ChildActorsExercise extends App {
   })
 }
 
-case class WordCounterState(workers: Set[ActorRef], pendingTasks: Int)
-
 object WordCountMessage {
   case class Initialize(nChildren: Int)
   case class Task(text: String)
