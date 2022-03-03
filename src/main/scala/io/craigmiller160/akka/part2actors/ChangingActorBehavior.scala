@@ -2,13 +2,17 @@ package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object ChangingActorBehavior extends App {
   val system = ActorSystem("changingActorBehavior")
   val fussyKid = system.actorOf(Props[FussyKid])
   val mom = system.actorOf(Props[Mom])
 
-  mom ! Mom.MomStart
+  mom ! Mom.MomStart(fussyKid)
+
+  system.terminate()
+    .map(_ => println("ActorSystem terminated"))
 }
 
 object FussyKid {
@@ -25,7 +29,7 @@ class FussyKid extends Actor {
       case Mom.VEGETABLE => state = SAD
       case Mom.CHOCOLATE => state = HAPPY
     }
-    case Mom.Ask => state match {
+    case Mom.Ask(_) => state match {
       case HAPPY => sender() ! KidAccept
       case SAD => sender() ! KidReject
     }
