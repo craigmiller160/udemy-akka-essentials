@@ -16,12 +16,12 @@ object VotingSystemExercise extends App{
 
     val citizens = Set(c1, c2, c3, c4, c5)
 
-    c1 ! Candidate.BILL_CLINTON
-    c2 ! Candidate.BILL_CLINTON
-    c3 ! Candidate.ROSS_PEROT
-    c4 ! Candidate.GEORGE_BUSH
+    c1 ! Vote(Candidate.BILL_CLINTON)
+    c2 ! Vote(Candidate.BILL_CLINTON)
+    c3 ! Vote(Candidate.ROSS_PEROT)
+    c4 ! Vote(Candidate.GEORGE_BUSH)
 
-    aggregator ! AggregateVotes
+    aggregator ! AggregateVotes(citizens)
   })
 }
 
