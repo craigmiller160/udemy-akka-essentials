@@ -51,6 +51,7 @@ class VoteAggregator extends Actor {
   override def receive: Receive = doReceive(VoteAggregation(0, 0, 0))
 
   // TODO what if multiple AggregateVotes requests are sent?
+  // TODO how to know when all vote responses are received and to print out the results
   private def doReceive(aggregation: VoteAggregation): Receive = {
     case AggregateVotes(citizens) =>
       citizens.foreach(ref => ref ! VoteStatusRequest)
