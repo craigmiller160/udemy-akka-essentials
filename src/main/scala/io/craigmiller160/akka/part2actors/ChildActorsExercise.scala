@@ -23,7 +23,7 @@ object WordCountMessage {
   case class Reply(count: Int)
 }
 class WordCounterMaster extends Actor {
-  override def receive: Receive = ???
+  override def receive: Receive = init
 
   private def init: Receive = {
     case WordCountMessage.Initialize(nChildren) =>
