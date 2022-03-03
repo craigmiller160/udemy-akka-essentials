@@ -10,10 +10,10 @@ object ChildActorsExercise extends App {
   })
 }
 
-object WordCounterMaster {
+object WordCountMessage {
   case class Initialize(nChildren: Int)
-  case class WordCountTask(text: String)
-  case class WordCountReply(count: Int)
+  case class Task(text: String)
+  case class Reply(count: Int)
 }
 class WordCounterMaster extends Actor {
   override def receive: Receive = ???
