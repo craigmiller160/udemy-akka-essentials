@@ -38,9 +38,9 @@ class WordCounterMaster extends Actor {
   private def count(workers: Set[ActorRef]): Receive = {
     case text: String =>
       val parts = text.split("[,.;:?!]")
-      val workersAndParts = workers.zipAll(parts, null, "")
-      workersAndParts.foreach {
-        case (worker, part) => worker ! WordCountMessage.Task(part)
+      val circularItr = Iterator.continually(workers).flatten
+      parts.foreach { part =>
+        circularItr.next() ! WordCountMessage.Task(part)
       }
   }
 
@@ -59,7 +59,7 @@ class WordCounterMaster extends Actor {
 class WordCounterWorker extends Actor {
   override def receive: Receive = {
     case WordCountMessage.Task(text) =>
-      val wordCount = text.split(" ").size
+      val wordCount = text.split(" ").length
       sender() ! WordCountMessage.Reply(wordCount)
   }
 }
