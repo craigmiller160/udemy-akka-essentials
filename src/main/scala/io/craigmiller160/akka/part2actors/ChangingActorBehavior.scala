@@ -8,9 +8,10 @@ import akka.actor.{Actor, ActorRef, Props}
 object ChangingActorBehavior extends App {
   ActorSystemHandler.useSimpleSystem("changeActorBehavior", system => {
     val fussyKid = system.actorOf(Props[FussyKid])
+    val statelessFussyKid = system.actorOf(Props[StatelessFussyKid])
     val mom = system.actorOf(Props[Mom])
 
-    mom ! Mom.MomStart(fussyKid)
+    mom ! Mom.MomStart(statelessFussyKid)
   })
 }
 
@@ -63,6 +64,8 @@ class Mom extends Actor {
   override def receive: Receive = {
     case MomStart(kid) =>
       kid ! Food(VEGETABLE)
+      kid ! Ask("do you want to play?")
+      kid ! Food(CHOCOLATE)
       kid ! Ask("do you want to play?")
     case FussyKid.KidAccept => println("Yay, my kid is happy!")
     case FussyKid.KidReject => println("My kid is sad, but at least he's healthy!")
