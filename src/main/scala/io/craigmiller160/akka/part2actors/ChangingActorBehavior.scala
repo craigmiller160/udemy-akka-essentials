@@ -1,18 +1,17 @@
 package io.craigmiller160.akka
 package io.craigmiller160.akka.part2actors
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import scala.concurrent.ExecutionContext.Implicits.global
+import io.craigmiller160.akka.utils.ActorSystemHandler
+
+import akka.actor.{Actor, ActorRef, Props}
 
 object ChangingActorBehavior extends App {
-  val system = ActorSystem("changingActorBehavior")
-  val fussyKid = system.actorOf(Props[FussyKid])
-  val mom = system.actorOf(Props[Mom])
+  ActorSystemHandler.useSimpleSystem("changeActorBehavior", system => {
+    val fussyKid = system.actorOf(Props[FussyKid])
+    val mom = system.actorOf(Props[Mom])
 
-  mom ! Mom.MomStart(fussyKid)
-
-  system.terminate()
-    .map(_ => println("ActorSystem terminated"))
+    mom ! Mom.MomStart(fussyKid)
+  })
 }
 
 object FussyKid {
