@@ -11,6 +11,9 @@ object ChildActors extends App {
     parent ! Parent.CreateChild("Bobby")
     parent ! Parent.TellChild("Hello World")
     parent ! Parent.TellChild("Hello Universe")
+
+    val childSelection = system.actorSelection("/user/parent/Bobby")
+    childSelection ! "I found you"
   })
 }
 
