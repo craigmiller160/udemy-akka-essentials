@@ -6,7 +6,10 @@ import io.craigmiller160.akka.utils.ActorSystemHandler
 
 object ChildActors extends App {
   ActorSystemHandler.useSimpleSystem("childActors", system => {
+    val parent = system.actorOf(Props[Parent], "parent")
 
+    parent ! Parent.CreateChild("Bobby")
+    parent ! Parent.TellChild("Hello World")
   })
 }
 
@@ -21,7 +24,7 @@ class Parent extends Actor {
   override def receive: Receive = {
     case CreateChild(name) =>
       println(s"${self.path} = Creating child $name")
-      val childRef = context.actorOf(Props[Child])
+      val childRef = context.actorOf(Props[Child], "child")
       child = Some(childRef)
     case TellChild(message) =>
       child.foreach(ref => ref ! message)
