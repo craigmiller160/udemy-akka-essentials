@@ -38,7 +38,7 @@ class WordCounterMaster extends Actor {
   private def count(workers: Set[ActorRef]): Receive = {
     case text: String =>
       val parts = text.split("[,.;:?!]")
-      val workersAndParts = workers.zipAll(parts, "", "")
+      val workersAndParts = workers.zipAll(parts, null, "")
       workersAndParts.foreach {
         case (worker, part) => worker ! WordCountMessage.Task(part)
       }
