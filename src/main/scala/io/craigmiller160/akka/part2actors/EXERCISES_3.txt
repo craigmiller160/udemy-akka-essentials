@@ -1,0 +1,6 @@
+1. Distributed word counting
+    a. Use lots of parallelism
+    b. Actor workers controlled by a master/main actor
+    c. WordCounterMaster and WordCounterWorker actors
+    d. Master receives initialize nChildren and creates N children of Worker type
+    e. Then send the text, master delegates to workers which count in parallel and then send back replies
