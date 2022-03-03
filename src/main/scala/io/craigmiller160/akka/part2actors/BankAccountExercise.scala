@@ -55,19 +55,19 @@ class BankAccount extends Actor {
   }
 
   override def receive: Receive = {
-    case BankAccountRequest(operation, amount) if (operation == BankOperation.DEPOSIT) =>
+    case BankAccountRequest(BankOperation.DEPOSIT, amount) =>
       val startBalance = balance
       balance += amount
-      newTransaction(operation, amount, startBalance, balance)
-      sender() ! Success(BankAccountResponse(operation, amount, balance))
-    case BankAccountRequest(operation, amount)
-      if (operation == BankOperation.WITHDRAWAL && amount > balance) =>
-      sender() ! Failure(InsufficientFundsException(BankAccountResponse(operation, amount, balance)))
-    case BankAccountRequest(operation, amount) if (operation == BankOperation.WITHDRAWAL) =>
+      newTransaction(BankOperation.DEPOSIT, amount, startBalance, balance)
+      sender() ! Success(BankAccountResponse(BankOperation.DEPOSIT, amount, balance))
+    case BankAccountRequest(BankOperation.WITHDRAWAL, amount)
+      if (amount > balance) =>
+      sender() ! Failure(InsufficientFundsException(BankAccountResponse(BankOperation.WITHDRAWAL, amount, balance)))
+    case BankAccountRequest(BankOperation.WITHDRAWAL, amount) =>
       val startBalance = balance
       balance -= amount
-      newTransaction(operation, amount, startBalance, balance)
-      sender() ! Success(BankAccountResponse(operation, amount, balance))
+      newTransaction(BankOperation.WITHDRAWAL, amount, startBalance, balance)
+      sender() ! Success(BankAccountResponse(BankOperation.WITHDRAWAL, amount, balance))
     case BankAccountStatementRequest() =>
       println("Received Statement")
       sender() ! Success(Statement(LocalDateTime.now(), balance, transactions.reverse))
