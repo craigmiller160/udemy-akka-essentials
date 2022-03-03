@@ -55,11 +55,17 @@ class VoteAggregator extends Actor {
   private def doReceive(aggregation: VoteAggregation): Receive = {
     case AggregateVotes(citizens) =>
       citizens.foreach(ref => ref ! VoteStatusRequest)
-    case VoteStatusReply(candidate) => candidate match {
-      case Some(Candidate.BILL_CLINTON) => context.become(doReceive(aggregation.copy(billClinton = aggregation.billClinton + 1)))
-      case Some(Candidate.GEORGE_BUSH) => context.become(doReceive(aggregation.copy(georgeBush = aggregation.georgeBush + 1)))
-      case Some(Candidate.ROSS_PEROT) => context.become(doReceive(aggregation.copy(rossPerot = aggregation.rossPerot + 1)))
-      case None =>
-    }
+    case VoteStatusReply(candidate) =>
+      val newAggregation = candidate match {
+        case Some(Candidate.BILL_CLINTON) => aggregation.copy(billClinton = aggregation.billClinton + 1)
+        case Some(Candidate.GEORGE_BUSH) => aggregation.copy(georgeBush = aggregation.georgeBush + 1)
+        case Some(Candidate.ROSS_PEROT) => aggregation.copy(rossPerot = aggregation.rossPerot + 1)
+        case None => aggregation
+      }
+      println("VOTES:")
+      println(s"  Bill Clinton: ${newAggregation.billClinton}")
+      println(s"  Ross Perot: ${newAggregation.rossPerot}")
+      println(s"  George Bush: ${newAggregation.georgeBush}")
+      context.become(doReceive(newAggregation))
   }
 }
