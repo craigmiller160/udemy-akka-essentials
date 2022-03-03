@@ -1,0 +1,13 @@
+1. recreate the counter actor with context.become and no mutable state
+    a. recommended something about "taking parameters" with the receivers
+
+2. simplified voting system
+    a. people voting for president
+    b. citizen actor, VoteAggregator actor
+    c. citizen must be marked as having voted for a candidate
+    d. citizen can only vote once, will go into a "already voted" state after
+    e. VoteAggregator will send messages to citizen asking who they voted for (receives set of ActorRefs of citizens)
+        i. Then sends messages to citizens asking for their votes.
+        ii. Citizen reply contains candidate as Option because they may not have voted
+
+PARTIAL APPLICATION FOR "stateless state"
