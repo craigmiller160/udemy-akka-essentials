@@ -62,10 +62,14 @@ class VoteAggregator extends Actor {
         case Some(Candidate.ROSS_PEROT) => aggregation.copy(rossPerot = aggregation.rossPerot + 1)
         case None => aggregation
       }
-      println("VOTES:")
-      println(s"  Bill Clinton: ${newAggregation.billClinton}")
-      println(s"  Ross Perot: ${newAggregation.rossPerot}")
-      println(s"  George Bush: ${newAggregation.georgeBush}")
+      printVotes(newAggregation)
       context.become(doReceive(newAggregation))
+  }
+
+  private def printVotes(aggregation: VoteAggregation): Unit = {
+    println("VOTES:")
+    println(s"  Bill Clinton: ${aggregation.billClinton}")
+    println(s"  Ross Perot: ${aggregation.rossPerot}")
+    println(s"  George Bush: ${aggregation.georgeBush}")
   }
 }
