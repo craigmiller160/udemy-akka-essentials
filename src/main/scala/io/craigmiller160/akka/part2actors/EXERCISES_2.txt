@@ -9,5 +9,6 @@
     e. VoteAggregator will send messages to citizen asking who they voted for (receives set of ActorRefs of citizens)
         i. Then sends messages to citizens asking for their votes.
         ii. Citizen reply contains candidate as Option because they may not have voted
+    f. End result is printing the vote results
 
 PARTIAL APPLICATION FOR "stateless state"
