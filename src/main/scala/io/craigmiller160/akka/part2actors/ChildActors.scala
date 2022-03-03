@@ -10,6 +10,7 @@ object ChildActors extends App {
 
     parent ! Parent.CreateChild("Bobby")
     parent ! Parent.TellChild("Hello World")
+    parent ! Parent.TellChild("Hello Universe")
   })
 }
 
@@ -19,15 +20,16 @@ object Parent {
 }
 class Parent extends Actor {
   import Parent._
-  private var child: Option[ActorRef] = None
-
   override def receive: Receive = {
     case CreateChild(name) =>
       println(s"${self.path} = Creating child $name")
-      val childRef = context.actorOf(Props[Child], "child")
-      child = Some(childRef)
+      val childRef = context.actorOf(Props[Child], name)
+      context.become(withChild(childRef))
+  }
+
+  private def withChild(child: ActorRef): Receive = {
     case TellChild(message) =>
-      child.foreach(ref => ref ! message)
+      child ! message
   }
 }
 
