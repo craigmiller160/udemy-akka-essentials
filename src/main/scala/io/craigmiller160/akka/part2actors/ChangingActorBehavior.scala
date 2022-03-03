@@ -41,13 +41,13 @@ class StatelessFussyKid extends Actor {
   override def receive: Receive = happyReceive
 
   private def happyReceive: Receive = {
-    case Mom.Food(Mom.VEGETABLE) => context.become(sadReceive)
+    case Mom.Food(Mom.VEGETABLE) => context.become(sadReceive, discardOld = false)
     case Mom.Food(Mom.CHOCOLATE) => // happy to stay happy
     case Mom.Ask(_) => sender() ! KidAccept
   }
   private def sadReceive: Receive = {
     case Mom.Food(Mom.VEGETABLE) => // sad so stay sad
-    case Mom.Food(Mom.CHOCOLATE) => context.become(happyReceive)
+    case Mom.Food(Mom.CHOCOLATE) => context.unbecome()
     case Mom.Ask(_) => sender() ! KidReject
   }
 }
