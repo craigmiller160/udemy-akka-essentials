@@ -9,13 +9,13 @@ object CounterExercise extends App {
   val actorSystem = ActorSystem("counterSystem")
   val counter = actorSystem.actorOf(Props[Counter], "counter")
 
-  counter ! CounterAction.INCREMENT
-  counter ! CounterAction.INCREMENT
-  counter ! CounterAction.INCREMENT
-  counter ! CounterAction.DECREMENT
-  counter ! CounterAction.PRINT
+  counter ! StatelessCounterAction.INCREMENT
+  counter ! StatelessCounterAction.INCREMENT
+  counter ! StatelessCounterAction.INCREMENT
+  counter ! StatelessCounterAction.DECREMENT
+  counter ! StatelessCounterAction.PRINT
 
-  val foo: CounterAction.Value = CounterAction.DECREMENT
+  val foo: StatelessCounterAction.Value = StatelessCounterAction.DECREMENT
 
   actorSystem.terminate()
     .map(_ => println("ActorSystem terminated"))
@@ -31,8 +31,8 @@ class Counter extends Actor {
   var count = 0
 
   override def receive: Receive = {
-    case CounterAction.INCREMENT => count += 1
-    case CounterAction.DECREMENT => count -= 1
-    case CounterAction.PRINT => println(s"Count is $count")
+    case StatelessCounterAction.INCREMENT => count += 1
+    case StatelessCounterAction.DECREMENT => count -= 1
+    case StatelessCounterAction.PRINT => println(s"Count is $count")
   }
 }
